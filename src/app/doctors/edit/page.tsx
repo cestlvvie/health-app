@@ -47,7 +47,7 @@ export default function EditDoctor() {
 
       if (response.ok) {
         alert('Doctor updated successfully!');
-        window.location.href = '/doctors'; // Redirect back to the doctors list
+        window.location.href = '/doctors/main'; // Redirect back to the doctors list
       } else {
         console.error('Error updating doctor');
       }

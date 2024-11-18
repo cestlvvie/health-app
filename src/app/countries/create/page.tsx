@@ -34,6 +34,7 @@ export default function CreateCountry() {
         cname: '',
         population: '',
       });
+      window.location.href = '/countries/main'; 
       console.log('Created country:', data);
     } catch (error) {
       console.error('Error:', error);

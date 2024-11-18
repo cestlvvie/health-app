@@ -37,7 +37,7 @@ export default function EditPatientDisease() {
     }
 
     try {
-      const response = await fetch('/api/patientdiseases', {
+      const response = await fetch('/api/patientdiseases/main', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

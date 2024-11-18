@@ -46,7 +46,7 @@ export default function EditPublicServant() {
 
       if (response.ok) {
         alert('Public Servant updated successfully!');
-        window.location.href = '/publicservants'; // Redirect back to the public servants list
+        window.location.href = '/publicservants/main'; // Redirect back to the public servants list
       } else {
         console.error('Error updating public servant');
       }

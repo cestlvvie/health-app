@@ -27,6 +27,7 @@ export default function CreateSpecialization() {
           id: '',
           email: '',
         });
+        window.location.href = '/specializations/main'; 
       } else {
         console.error('Error creating specialization');
       }

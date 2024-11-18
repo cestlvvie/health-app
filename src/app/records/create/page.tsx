@@ -34,6 +34,7 @@ export default function CreateRecord() {
           total_deaths: '',
           total_patients: '',
         });
+        window.location.href = '/records/main'; 
       } else {
         console.error('Error creating record');
       }

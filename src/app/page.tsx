@@ -4,17 +4,17 @@ import Link from 'next/link';
 
 export default function MainPage() {
   const pages = [
-    { name: 'Countries', route: '/countries' },
-    { name: 'Discoveries', route: '/discoveries' },
-    { name: 'Diseases', route: '/diseases' },
-    { name: 'Disease Types', route: '/diseasetypes' },
-    { name: 'Doctors', route: '/doctors' },
-    { name: 'Patient Diseases', route: '/patientdiseases' },
-    { name: 'Patients', route: '/patients' },
-    { name: 'Public Servants', route: '/publicservants' },
-    { name: 'Records', route: '/records' },
-    { name: 'Specializations', route: '/specializations' },
-    { name: 'Users', route: '/users' },
+    { name: 'Countries', route: '/countries/main' },
+    { name: 'Discoveries', route: '/discoveries/main' },
+    { name: 'Diseases', route: '/diseases/main' },
+    { name: 'Disease Types', route: '/diseasetypes/main' },
+    { name: 'Doctors', route: '/doctors/main' },
+    { name: 'Patient Diseases', route: '/patientdiseases/main' },
+    { name: 'Patients', route: '/patients/main' },
+    { name: 'Public Servants', route: '/publicservants/main' },
+    { name: 'Records', route: '/records/main' },
+    { name: 'Specializations', route: '/specializations/main' },
+    { name: 'Users', route: '/users/main' },
   ];
 
   return (

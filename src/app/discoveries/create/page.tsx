@@ -29,6 +29,7 @@ export default function CreateDiscovery() {
           disease_code: '',
           first_enc_date: '',
         });
+        window.location.href = '/discoveries/main'; 
       } else {
         console.error('Error creating discovery');
       }

@@ -34,6 +34,7 @@ export default function CreateDiseaseType() {
         id: '',
         description: '',
       });
+      window.location.href = '/diseasetypes/main'; 
       console.log('Created disease type:', data);
     } catch (error) {
       console.error('Error:', error);

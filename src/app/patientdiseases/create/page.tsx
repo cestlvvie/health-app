@@ -24,6 +24,7 @@ export default function CreatePatientDisease() {
           email: '',
           disease_code: '',
         });
+        window.location.href = '/patientdiseases/main'; 
       } else {
         const errorData = await response.json();
         console.error('Error creating association:', errorData);

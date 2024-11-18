@@ -24,6 +24,7 @@ export default function CreateDoctor() {
           email: '',
           degree: '',
         });
+        window.location.href = '/doctors/main'; 
       } else {
         console.error('Error creating doctor');
       }

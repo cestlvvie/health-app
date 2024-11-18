@@ -47,7 +47,7 @@ export default function EditDiseaseType() {
 
       if (response.ok) {
         alert('Disease type updated successfully!');
-        window.location.href = '/diseasetypes'; // Redirect back to the disease types list
+        window.location.href = '/diseasetypes/main'; // Redirect back to the disease types list
       } else {
         console.error('Error updating disease type');
       }

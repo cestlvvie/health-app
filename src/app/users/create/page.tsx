@@ -32,6 +32,7 @@ export default function CreateUser() {
           phone: '',
           cname: '',
         });
+        window.location.href = '/users/main'; 
       } else {
         console.error('Error creating user');
       }

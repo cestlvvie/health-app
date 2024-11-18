@@ -45,7 +45,7 @@ export default function EditPatient() {
 
       if (response.ok) {
         alert('Patient updated successfully!');
-        window.location.href = '/patients'; // Redirect back to the patients list
+        window.location.href = '/patients/main'; // Redirect back to the patients list
       } else {
         console.error('Error updating patient');
       }

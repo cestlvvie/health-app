@@ -52,7 +52,7 @@ export default function EditDisease() {
 
       if (response.ok) {
         alert('Disease updated successfully!');
-        window.location.href = '/diseases'; // Redirect back to the diseases list
+        window.location.href = '/diseases/main'; // Redirect back to the diseases list
       } else {
         console.error('Error updating disease');
       }

@@ -49,7 +49,7 @@ export default function EditDiscovery() {
 
       if (response.ok) {
         alert('Discovery updated successfully!');
-        window.location.href = '/discoveries'; // Redirect back to the discoveries list
+        window.location.href = '/discoveries/main'; // Redirect back to the discoveries list
       } else {
         console.error('Error updating discovery');
       }

@@ -22,6 +22,7 @@ export default function CreatePatient() {
         setForm({
           email: '',
         });
+        window.location.href = '/patients/main'; 
       } else {
         console.error('Error creating patient');
       }

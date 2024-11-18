@@ -38,6 +38,7 @@ export default function CreateDisease() {
         description: '',
         id: '',
       });
+      window.location.href = '/diseases/main'; 
       console.log('Created disease:', data);
     } catch (error) {
       console.error('Error:', error);

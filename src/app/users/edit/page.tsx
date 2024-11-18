@@ -56,7 +56,7 @@ export default function EditUser() {
 
       if (response.ok) {
         alert('User updated successfully!');
-        window.location.href = '/users'; // Redirect back to the users list
+        window.location.href = '/users/main'; // Redirect back to the users list
       } else {
         console.error('Error updating user');
       }

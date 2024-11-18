@@ -37,6 +37,11 @@ export default function SpecializationsPage() {
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold text-blue-600 text-center mb-8">Specialization Management</h1>
         <div className="flex justify-end mb-6">
+        <Link href="/">
+            <button className="bg-blue-500 text-white py-2 px-4 mx-3 rounded shadow hover:bg-blue-600">
+              Back
+            </button>
+          </Link>
           <Link href="/specializations/create">
             <button className="bg-blue-500 text-white py-2 px-4 rounded shadow hover:bg-blue-600">
               Add Specialization

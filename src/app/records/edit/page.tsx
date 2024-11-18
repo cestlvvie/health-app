@@ -56,7 +56,7 @@ export default function EditRecord() {
 
       if (response.ok) {
         alert('Record updated successfully!');
-        window.location.href = '/records'; // Redirect back to the records list
+        window.location.href = '/records/main'; // Redirect back to the records list
       } else {
         console.error('Error updating record');
       }

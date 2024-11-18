@@ -24,6 +24,7 @@ export default function CreatePublicServant() {
           email: '',
           department: '',
         });
+        window.location.href = '/publicservants/main'; 
       } else {
         console.error('Error creating public servant');
       }

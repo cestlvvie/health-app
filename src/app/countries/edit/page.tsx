@@ -47,7 +47,7 @@ export default function EditCountry() {
 
       if (response.ok) {
         alert('Country updated successfully!');
-        window.location.href = '/countries'; // Redirect back to the countries list
+        window.location.href = '/countries/main'; // Redirect back to the countries list
       } else {
         console.error('Error updating country');
       }
@@ -78,6 +78,6 @@ export default function EditCountry() {
         </form>
       </div>
     </div>
-    </Suspense>
+  </Suspense>
   );
 }
