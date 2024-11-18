@@ -57,7 +57,7 @@ export default function EditCountry() {
   };
 
   return (
-    <Suspense fallback={<p>Loading...</p>}> 
+    <Suspense> 
     <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
       <div className="bg-white p-8 rounded shadow w-full max-w-md mx-auto">
         <h1 className="text-2xl font-bold text-center mb-6 text-blue-600">Edit Country</h1>
