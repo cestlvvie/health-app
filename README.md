@@ -3,7 +3,7 @@
 A full-stack CRUD application for managing health-related data, including Patients, Diseases, Doctors, and more.
 
 ## 🚀 Live Application
-Visit the live app: [https://your-app-name.onrender.com](https://your-app-name.onrender.com)
+Visit the live app: https://health-app-963z.onrender.com
 
 ---
 
@@ -39,7 +39,7 @@ Visit the live app: [https://your-app-name.onrender.com](https://your-app-name.o
    npm install
 3. **Set up environment variables**:
 Create a .env file in the root directory:
-DATABASE_URL=postgresql://username:password@db.supabase.co:5432/your-database
+DATABASE_URL=postgresql://username:password:host:5432/your-database
 4. **Push Prisma schema to the database**:
    npx prisma db push
 5. **Run App locally**:
