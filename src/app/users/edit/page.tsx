@@ -1,12 +1,10 @@
 'use client';
 export const dynamic = 'force-dynamic';
 
-import { useState, useEffect, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useState, useEffect } from 'react';
 
 export default function EditUser() {
-  const searchParams = useSearchParams();
-  const email = searchParams.get('email');
+  const [email, setEmail] = useState('');
   const [form, setForm] = useState({
     name: '',
     surname: '',
@@ -16,24 +14,31 @@ export default function EditUser() {
   });
 
   useEffect(() => {
-    async function fetchUser() {
-      try {
-        const response = await fetch(`/api/users?email=${email}`);
-        const user = await response.json();
-        // Ensure each field has a fallback to prevent undefined values
-        setForm({
-          name: user.name || '',
-          surname: user.surname || '',
-          salary: user.salary?.toString() || '', // Convert number to string
-          phone: user.phone || '',
-          cname: user.cname || '',
-        });
-      } catch (error) {
-        console.error('Error fetching user:', error);
+    // Extract email from URL query parameters
+    const searchParams = new URLSearchParams(window.location.search);
+    const emailParam = searchParams.get('email') || '';
+    setEmail(emailParam);
+
+    // Fetch the user data if email exists
+    if (emailParam) {
+      async function fetchUser() {
+        try {
+          const response = await fetch(`/api/users?email=${emailParam}`);
+          const user = await response.json();
+          setForm({
+            name: user.name || '',
+            surname: user.surname || '',
+            salary: user.salary?.toString() || '', // Convert number to string
+            phone: user.phone || '',
+            cname: user.cname || '',
+          });
+        } catch (error) {
+          console.error('Error fetching user:', error);
+        }
       }
+      fetchUser();
     }
-    if (email) fetchUser();
-  }, [email]);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,7 +71,6 @@ export default function EditUser() {
   };
 
   return (
-    <Suspense fallback={<p>Loading...</p>}>
     <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
       <div className="bg-white p-8 rounded shadow w-full max-w-md mx-auto">
         <h1 className="text-2xl font-bold text-center mb-6 text-blue-600">Edit User</h1>
@@ -120,6 +124,5 @@ export default function EditUser() {
         </form>
       </div>
     </div>
-    </Suspense>
   );
 }

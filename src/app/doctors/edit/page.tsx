@@ -1,31 +1,36 @@
 'use client';
 export const dynamic = 'force-dynamic';
 
-import { useState, useEffect, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useState, useEffect } from 'react';
 
 export default function EditDoctor() {
-  const searchParams = useSearchParams();
-  const email = searchParams.get('email');
+  const [email, setEmail] = useState('');
   const [form, setForm] = useState({
     degree: '',
   });
 
   useEffect(() => {
-    async function fetchDoctor() {
-      try {
-        const response = await fetch(`/api/doctors?email=${email}`);
-        const doctor = await response.json();
-        // Ensure each field has a fallback to prevent undefined values
-        setForm({
-          degree: doctor.degree || '',
-        });
-      } catch (error) {
-        console.error('Error fetching doctor:', error);
+    // Extract email from URL query parameters
+    const searchParams = new URLSearchParams(window.location.search);
+    const emailParam = searchParams.get('email') || '';
+    setEmail(emailParam);
+
+    // Fetch the doctor's data if email exists
+    if (emailParam) {
+      async function fetchDoctor() {
+        try {
+          const response = await fetch(`/api/doctors?email=${emailParam}`);
+          const doctor = await response.json();
+          setForm({
+            degree: doctor.degree || '', // Ensure degree is a string
+          });
+        } catch (error) {
+          console.error('Error fetching doctor:', error);
+        }
       }
+      fetchDoctor();
     }
-    if (email) fetchDoctor();
-  }, [email]);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,7 +62,6 @@ export default function EditDoctor() {
   };
 
   return (
-    <Suspense fallback={<p>Loading...</p>}> 
     <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
       <div className="bg-white p-8 rounded shadow w-full max-w-md mx-auto">
         <h1 className="text-2xl font-bold text-center mb-6 text-blue-600">Edit Doctor</h1>
@@ -79,6 +83,5 @@ export default function EditDoctor() {
         </form>
       </div>
     </div>
-    </Suspense>
   );
 }

@@ -1,14 +1,14 @@
 'use client';
 export const dynamic = 'force-dynamic';
 
-import { useState, useEffect, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useState, useEffect } from 'react';
 
 export default function EditRecord() {
-  const searchParams = useSearchParams();
-  const email = searchParams.get('email');
-  const cname = searchParams.get('cname');
-  const disease_code = searchParams.get('disease_code');
+  const [params, setParams] = useState({
+    email: '',
+    cname: '',
+    disease_code: '',
+  });
 
   const [form, setForm] = useState({
     total_deaths: '',
@@ -16,25 +16,38 @@ export default function EditRecord() {
   });
 
   useEffect(() => {
-    async function fetchRecord() {
-      try {
-        const response = await fetch(
-          `/api/records?email=${email}&cname=${cname}&disease_code=${disease_code}`
-        );
-        const record = await response.json();
-        setForm({
-          total_deaths: record.total_deaths?.toString() || '',
-          total_patients: record.total_patients?.toString() || '',
-        });
-      } catch (error) {
-        console.error('Error fetching record:', error);
+    // Extract query parameters from URL
+    const searchParams = new URLSearchParams(window.location.search);
+    const emailParam = searchParams.get('email') || '';
+    const cnameParam = searchParams.get('cname') || '';
+    const diseaseCodeParam = searchParams.get('disease_code') || '';
+
+    setParams({ email: emailParam, cname: cnameParam, disease_code: diseaseCodeParam });
+
+    // Fetch the record if all query parameters exist
+    if (emailParam && cnameParam && diseaseCodeParam) {
+      async function fetchRecord() {
+        try {
+          const response = await fetch(
+            `/api/records?email=${emailParam}&cname=${cnameParam}&disease_code=${diseaseCodeParam}`
+          );
+          const record = await response.json();
+          setForm({
+            total_deaths: record.total_deaths?.toString() || '',
+            total_patients: record.total_patients?.toString() || '',
+          });
+        } catch (error) {
+          console.error('Error fetching record:', error);
+        }
       }
+      fetchRecord();
     }
-    if (email && cname && disease_code) fetchRecord();
-  }, [email, cname, disease_code]);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const { email, cname, disease_code } = params;
 
     if (!email || !cname || !disease_code) {
       alert('Error: Missing composite key fields. Cannot update record.');
@@ -66,7 +79,6 @@ export default function EditRecord() {
   };
 
   return (
-    <Suspense fallback={<p>Loading...</p>}> 
     <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
       <div className="bg-white p-8 rounded shadow w-full max-w-md mx-auto">
         <h1 className="text-2xl font-bold text-center mb-6 text-blue-600">Edit Record</h1>
@@ -94,6 +106,5 @@ export default function EditRecord() {
         </form>
       </div>
     </div>
-    </Suspense>
   );
 }

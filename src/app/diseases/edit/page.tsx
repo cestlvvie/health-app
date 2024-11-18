@@ -1,12 +1,10 @@
 'use client';
 export const dynamic = 'force-dynamic';
 
-import { useState, useEffect, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useState, useEffect } from 'react';
 
 export default function EditDisease() {
-  const searchParams = useSearchParams();
-  const disease_code = searchParams.get('disease_code');
+  const [diseaseCode, setDiseaseCode] = useState('');
   const [form, setForm] = useState({
     pathogen: '',
     description: '',
@@ -14,26 +12,34 @@ export default function EditDisease() {
   });
 
   useEffect(() => {
-    async function fetchDisease() {
-      try {
-        const response = await fetch(`/api/diseases?disease_code=${disease_code}`);
-        const disease = await response.json();
-        setForm({
-          pathogen: disease.pathogen || '', // Ensure pathogen is a string
-          description: disease.description || '', // Ensure description is a string
-          id: disease.id ? disease.id.toString() : '', // Convert id to string for input
-        });
-      } catch (error) {
-        console.error('Error fetching disease:', error);
+    // Extract the disease_code query parameter from the URL
+    const searchParams = new URLSearchParams(window.location.search);
+    const disease_code = searchParams.get('disease_code') || '';
+    setDiseaseCode(disease_code);
+
+    // Fetch the disease data if disease_code is present
+    if (disease_code) {
+      async function fetchDisease() {
+        try {
+          const response = await fetch(`/api/diseases?disease_code=${disease_code}`);
+          const disease = await response.json();
+          setForm({
+            pathogen: disease.pathogen || '', // Ensure pathogen is a string
+            description: disease.description || '', // Ensure description is a string
+            id: disease.id ? disease.id.toString() : '', // Convert id to string for input
+          });
+        } catch (error) {
+          console.error('Error fetching disease:', error);
+        }
       }
+      fetchDisease();
     }
-    if (disease_code) fetchDisease();
-  }, [disease_code]);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!disease_code) {
+    if (!diseaseCode) {
       alert('Error: Disease code is missing. Cannot update disease.');
       return;
     }
@@ -43,7 +49,7 @@ export default function EditDisease() {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          disease_code,
+          disease_code: diseaseCode,
           pathogen: form.pathogen,
           description: form.description,
           id: form.id ? Number(form.id) : null, // Convert id to number or null
@@ -62,7 +68,6 @@ export default function EditDisease() {
   };
 
   return (
-    <Suspense fallback={<p>Loading...</p>}> 
     <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
       <div className="bg-white p-8 rounded shadow w-full max-w-md mx-auto">
         <h1 className="text-2xl font-bold text-center mb-6 text-blue-600">Edit Disease</h1>
@@ -97,6 +102,5 @@ export default function EditDisease() {
         </form>
       </div>
     </div>
-    </Suspense>
   );
 }

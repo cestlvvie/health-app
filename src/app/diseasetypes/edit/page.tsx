@@ -1,31 +1,36 @@
 'use client';
 export const dynamic = 'force-dynamic';
 
-import { useState, useEffect, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useState, useEffect } from 'react';
 
 export default function EditDiseaseType() {
-  const searchParams = useSearchParams();
-  const id = searchParams.get('id');
+  const [id, setId] = useState('');
   const [form, setForm] = useState({
     description: '',
   });
 
   useEffect(() => {
-    async function fetchDiseaseType() {
-      try {
-        const response = await fetch(`/api/diseasetypes?id=${id}`);
-        const diseaseType = await response.json();
-        // Ensure each field has a fallback to prevent undefined values
-        setForm({
-          description: diseaseType.description || '', // Ensure description is a string
-        });
-      } catch (error) {
-        console.error('Error fetching disease type:', error);
+    // Extract the id query parameter using URLSearchParams
+    const searchParams = new URLSearchParams(window.location.search);
+    const idParam = searchParams.get('id') || '';
+    setId(idParam);
+
+    // Fetch the disease type data if id is present
+    if (idParam) {
+      async function fetchDiseaseType() {
+        try {
+          const response = await fetch(`/api/diseasetypes?id=${idParam}`);
+          const diseaseType = await response.json();
+          setForm({
+            description: diseaseType.description || '', // Ensure description is a string
+          });
+        } catch (error) {
+          console.error('Error fetching disease type:', error);
+        }
       }
+      fetchDiseaseType();
     }
-    if (id) fetchDiseaseType();
-  }, [id]);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,7 +62,6 @@ export default function EditDiseaseType() {
   };
 
   return (
-    <Suspense fallback={<p>Loading...</p>}>
     <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
       <div className="bg-white p-8 rounded shadow w-full max-w-md mx-auto">
         <h1 className="text-2xl font-bold text-center mb-6 text-blue-600">Edit Disease Type</h1>
@@ -78,6 +82,5 @@ export default function EditDiseaseType() {
         </form>
       </div>
     </div>
-    </Suspense>
   );
 }

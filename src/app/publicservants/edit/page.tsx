@@ -1,30 +1,36 @@
 'use client';
 export const dynamic = 'force-dynamic';
 
-import { useState, useEffect, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useState, useEffect } from 'react';
 
 export default function EditPublicServant() {
-  const searchParams = useSearchParams();
-  const email = searchParams.get('email');
+  const [email, setEmail] = useState('');
   const [form, setForm] = useState({
     department: '',
   });
 
   useEffect(() => {
-    async function fetchPublicServant() {
-      try {
-        const response = await fetch(`/api/publicservants?email=${email}`);
-        const publicServant = await response.json();
-        setForm({
-          department: publicServant.department || '',
-        });
-      } catch (error) {
-        console.error('Error fetching public servant:', error);
+    // Extract email from URL query parameters
+    const searchParams = new URLSearchParams(window.location.search);
+    const emailParam = searchParams.get('email') || '';
+    setEmail(emailParam);
+
+    // Fetch the public servant data if email exists
+    if (emailParam) {
+      async function fetchPublicServant() {
+        try {
+          const response = await fetch(`/api/publicservants?email=${emailParam}`);
+          const publicServant = await response.json();
+          setForm({
+            department: publicServant.department || '',
+          });
+        } catch (error) {
+          console.error('Error fetching public servant:', error);
+        }
       }
+      fetchPublicServant();
     }
-    if (email) fetchPublicServant();
-  }, [email]);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,10 +62,11 @@ export default function EditPublicServant() {
   };
 
   return (
-    <Suspense fallback={<p>Loading...</p>}> 
     <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
       <div className="bg-white p-8 rounded shadow w-full max-w-md mx-auto">
-        <h1 className="text-2xl font-bold text-center mb-6 text-blue-600">Edit Public Servant</h1>
+        <h1 className="text-2xl font-bold text-center mb-6 text-blue-600">
+          Edit Public Servant
+        </h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="email"
@@ -85,6 +92,5 @@ export default function EditPublicServant() {
         </form>
       </div>
     </div>
-    </Suspense>
   );
 }

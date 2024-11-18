@@ -1,30 +1,36 @@
 'use client';
 export const dynamic = 'force-dynamic';
 
-import { useState, useEffect, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useState, useEffect } from 'react';
 
 export default function EditPatient() {
-  const searchParams = useSearchParams();
-  const email = searchParams.get('email');
+  const [email, setEmail] = useState('');
   const [form, setForm] = useState({
     email: '',
   });
 
   useEffect(() => {
-    async function fetchPatient() {
-      try {
-        const response = await fetch(`/api/patients?email=${email}`);
-        const patient = await response.json();
-        setForm({
-          email: patient.email || '',
-        });
-      } catch (error) {
-        console.error('Error fetching patient:', error);
+    // Extract email from URL query parameters
+    const searchParams = new URLSearchParams(window.location.search);
+    const emailParam = searchParams.get('email') || '';
+    setEmail(emailParam);
+
+    // Fetch the patient data if email exists
+    if (emailParam) {
+      async function fetchPatient() {
+        try {
+          const response = await fetch(`/api/patients?email=${emailParam}`);
+          const patient = await response.json();
+          setForm({
+            email: patient.email || '',
+          });
+        } catch (error) {
+          console.error('Error fetching patient:', error);
+        }
       }
+      fetchPatient();
     }
-    if (email) fetchPatient();
-  }, [email]);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,7 +61,6 @@ export default function EditPatient() {
   };
 
   return (
-    <Suspense fallback={<p>Loading...</p>}> 
     <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
       <div className="bg-white p-8 rounded shadow w-full max-w-md mx-auto">
         <h1 className="text-2xl font-bold text-center mb-6 text-blue-600">Edit Patient</h1>
@@ -78,6 +83,5 @@ export default function EditPatient() {
         </form>
       </div>
     </div>
-    </Suspense>
   );
 }

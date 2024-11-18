@@ -1,31 +1,36 @@
 'use client';
 export const dynamic = 'force-dynamic';
 
-import { useState, useEffect, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useState, useEffect } from 'react';
 
 export default function EditCountry() {
-  const searchParams = useSearchParams();
-  const cname = searchParams.get('cname');
+  const [cname, setCname] = useState('');
   const [form, setForm] = useState({
     population: '',
   });
 
   useEffect(() => {
-    async function fetchCountry() {
-      try {
-        const response = await fetch(`/api/countries?cname=${cname}`);
-        const country = await response.json();
-        // Ensure each field has a fallback to prevent undefined values
-        setForm({
-          population: country.population?.toString() || '', // Convert BigInt to string
-        });
-      } catch (error) {
-        console.error('Error fetching country:', error);
+    // Extract query parameters using URLSearchParams
+    const searchParams = new URLSearchParams(window.location.search);
+    const cnameParam = searchParams.get('cname') || '';
+    setCname(cnameParam);
+
+    // Fetch the country data if the cname is available
+    if (cnameParam) {
+      async function fetchCountry() {
+        try {
+          const response = await fetch(`/api/countries?cname=${cnameParam}`);
+          const country = await response.json();
+          setForm({
+            population: country.population?.toString() || '', // Convert BigInt to string
+          });
+        } catch (error) {
+          console.error('Error fetching country:', error);
+        }
       }
+      fetchCountry();
     }
-    if (cname) fetchCountry();
-  }, [cname]);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,10 +62,11 @@ export default function EditCountry() {
   };
 
   return (
-    <Suspense> 
     <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
       <div className="bg-white p-8 rounded shadow w-full max-w-md mx-auto">
-        <h1 className="text-2xl font-bold text-center mb-6 text-blue-600">Edit Country</h1>
+        <h1 className="text-2xl font-bold text-center mb-6 text-blue-600">
+          Edit Country
+        </h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="text"
@@ -78,6 +84,5 @@ export default function EditCountry() {
         </form>
       </div>
     </div>
-  </Suspense>
   );
 }
