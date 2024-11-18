@@ -1,6 +1,7 @@
 'use client';
+export const dynamic = 'force-dynamic';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 
 export default function EditPatientDisease() {
@@ -58,6 +59,7 @@ export default function EditPatientDisease() {
   };
 
   return (
+    <Suspense fallback={<p>Loading...</p>}> 
     <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
       <div className="bg-white p-8 rounded shadow w-full max-w-md mx-auto">
         <h1 className="text-2xl font-bold text-center mb-6 text-blue-600">Edit Patient-Disease Association</h1>
@@ -79,5 +81,6 @@ export default function EditPatientDisease() {
         </form>
       </div>
     </div>
+    </Suspense>
   );
 }
