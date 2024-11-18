@@ -2,9 +2,6 @@
 
 A full-stack CRUD application for managing health-related data, including Patients, Diseases, Doctors, and more.
 
-## 🚀 Live Application
-Visit the live app: https://health-app-963z.onrender.com
-
 ---
 
 ## 📋 Features
