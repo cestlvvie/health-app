@@ -2,10 +2,43 @@ import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient({
-  log: ['query', 'info', 'warn', 'error'], // Enable Prisma logs
+  log: ['query', 'info', 'warn', 'error'], 
 });
 
-// Create a new specialization
+function handlePrismaError(error: unknown) {
+  if (error instanceof Error && 'code' in error) {
+    const prismaError = error as any;
+    switch (prismaError.code) {
+      case 'P2003':  
+        if (prismaError.meta?.field_name === 'specialize_email_fkey (index)') {
+          return {
+            error: 'Foreign key constraint violated: The provided email does not exist in the doctor table.',
+            details: prismaError.meta,
+          };
+        }
+        if (prismaError.meta?.field_name === 'specialize_id_fkey (index)') {
+          return {
+            error: 'Foreign key constraint violated: The provided disease type ID does not exist.',
+            details: prismaError.meta,
+          };
+        }
+        return {
+          error: 'Foreign key constraint violated: Related record does not exist.',
+          details: prismaError.meta,
+        };
+      default:
+        return { error: 'Database error occurred', details: prismaError.message };
+    }
+  }
+
+  if (error instanceof Error) {
+    return { error: 'An unexpected error occurred', details: error.message };
+  }
+
+  return { error: 'An unknown error occurred', details: String(error) };
+}
+
+ 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
@@ -15,36 +48,36 @@ export async function POST(req: Request) {
       data: {
         id,
         email,
-        // Assume related doctor and diseasetype already exist
       },
     });
 
-    return NextResponse.json(newSpecialization); // Return the newly created specialization
+    return NextResponse.json(newSpecialization);  
   } catch (error) {
     console.error('Error creating specialization:', error);
-    return handleError(error, 'Error creating specialization');
+    const handledError = handlePrismaError(error);
+    return NextResponse.json(handledError, { status: 500 });
   }
 }
 
-// Fetch all specializations
+ 
 export async function GET() {
   try {
     const specializations = await prisma.specialize.findMany({
       include: {
-        doctor: true, // Include related doctor data
-        diseasetype: true, // Include related diseasetype data
+        doctor: true,  
+        diseasetype: true,  
       },
     });
 
     return NextResponse.json(specializations);
   } catch (error) {
     console.error('Error fetching specializations:', error);
-    return handleError(error, 'Error fetching specializations');
+    const handledError = handlePrismaError(error);
+    return NextResponse.json(handledError, { status: 500 });
   }
 }
 
- 
-// Delete a specialization
+
 export async function DELETE(req: Request) {
   try {
     const body = await req.json();
@@ -52,27 +85,14 @@ export async function DELETE(req: Request) {
 
     const deletedSpecialization = await prisma.specialize.delete({
       where: {
-        id_email: { id, email }, // Composite key
+        id_email: { id, email }, 
       },
     });
 
-    return NextResponse.json(deletedSpecialization); // Return the deleted specialization
+    return NextResponse.json(deletedSpecialization);  
   } catch (error) {
     console.error('Error deleting specialization:', error);
-    return handleError(error, 'Error deleting specialization');
+    const handledError = handlePrismaError(error);
+    return NextResponse.json(handledError, { status: 500 });
   }
-}
-
-// Error handling utility
-function handleError(error: unknown, defaultMessage: string) {
-  if (error instanceof Error) {
-    return NextResponse.json(
-      { error: defaultMessage, details: error.message },
-      { status: 500 }
-    );
-  }
-  return NextResponse.json(
-    { error: defaultMessage, details: String(error) },
-    { status: 500 }
-  );
 }

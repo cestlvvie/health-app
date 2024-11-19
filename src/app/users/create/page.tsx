@@ -12,8 +12,11 @@ export default function CreateUser() {
     cname: '',
   });
 
+  const [error, setError] = useState<string | null>(null);  
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);  
 
     try {
       const response = await fetch('/api/users', {
@@ -32,12 +35,14 @@ export default function CreateUser() {
           phone: '',
           cname: '',
         });
-        window.location.href = '/users/main'; 
+        window.location.href = '/users/main';  
       } else {
-        console.error('Error creating user');
+        const data = await response.json();
+        setError(data.error || 'An unknown error occurred');  
       }
-    } catch (error) {
-      console.error('Error:', error);
+    } catch (err) {
+      setError('Failed to create user. Please try again.');
+      console.error('Network or server error:', err);
     }
   };
 
@@ -45,6 +50,11 @@ export default function CreateUser() {
     <div className="min-h-screen bg-gray-100 flex items-center justify-center">
       <div className="bg-white p-8 rounded shadow w-full max-w-md">
         <h1 className="text-2xl font-bold text-center mb-6 text-blue-600">Add User</h1>
+        {error && (
+          <div className="text-red-600 text-sm mb-4 p-2 border border-red-600 rounded bg-red-100">
+            {error}
+          </div>
+        )}
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="email"

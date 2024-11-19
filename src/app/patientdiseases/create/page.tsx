@@ -8,8 +8,11 @@ export default function CreatePatientDisease() {
     disease_code: '',
   });
 
+  const [error, setError] = useState<string | null>(null);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
 
     try {
       const response = await fetch('/api/patientdiseases', {
@@ -18,21 +21,24 @@ export default function CreatePatientDisease() {
         body: JSON.stringify(form),
       });
 
-      if (response.ok) {
-        alert('Patient-Disease association added successfully!');
-        setForm({
-          email: '',
-          disease_code: '',
-        });
-        window.location.href = '/patientdiseases/main'; 
-      } else {
+      if (!response.ok) {
         const errorData = await response.json();
-        console.error('Error creating association:', errorData);
-        alert(`Error: ${errorData.error || 'Something went wrong'}`);
+        setError(errorData.error || 'Something went wrong');
+        return;
       }
-    } catch (error) {
-      console.error('Error:', error);
-      alert('An unexpected error occurred. Please try again.');
+
+      alert('Patient-Disease association added successfully!');
+      setForm({
+        email: '',
+        disease_code: '',
+      });
+      window.location.href = '/patientdiseases/main';
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('An unexpected error occurred.');
+      }
     }
   };
 
@@ -40,6 +46,11 @@ export default function CreatePatientDisease() {
     <div className="min-h-screen bg-gray-100 flex items-center justify-center">
       <div className="bg-white p-8 rounded shadow w-full max-w-md">
         <h1 className="text-2xl font-bold text-center mb-6 text-blue-600">Add Patient-Disease Association</h1>
+        {error && (
+          <div className="text-red-600 text-sm mb-4 p-2 border border-red-600 rounded bg-red-100">
+            {error}
+          </div>
+        )}
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="email"

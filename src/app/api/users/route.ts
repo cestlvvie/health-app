@@ -2,12 +2,31 @@ import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient({
-  log: ['query', 'info', 'warn', 'error'], // Enable Prisma logs
+  log: ['query', 'info', 'warn', 'error'],  
 });
 
+function handlePrismaError(error: unknown) {
+  if (error instanceof Error && 'code' in error) {
+    const prismaError = error as any;
+    switch (prismaError.code) {
+      case 'P2002':  
+        return { error: 'This email already exists', details: prismaError.meta };
+      case 'P2003':  
+        return { error: 'This country does not exist', details: prismaError.meta };
+      default:
+        return { error: 'Database error occurred', details: prismaError.message };
+    }
+  }
+
+  if (error instanceof Error) {
+    return { error: 'An unexpected error occurred', details: error.message };
+  }
+
+  return { error: 'An unknown error occurred', details: String(error) };
+}
 
 export async function POST(req: Request) {
-  const body = await req.json(); // Parse the request body
+  const body = await req.json();
   const { email, name, surname, salary, phone, cname } = body;
 
   try {
@@ -16,14 +35,16 @@ export async function POST(req: Request) {
         email,
         name,
         surname,
-        salary: Number(salary), // Convert string to number
+        salary: Number(salary),
         phone,
         cname,
       },
     });
-    return NextResponse.json(newUser); // Return the newly created user
+    return NextResponse.json(newUser);
   } catch (error) {
-    return NextResponse.json({ error: 'Error creating user', details: error }, { status: 500 });
+    console.error('Error creating user:', error);
+    const handledError = handlePrismaError(error);
+    return NextResponse.json(handledError, { status: 500 });
   }
 }
 
@@ -32,8 +53,9 @@ export async function GET() {
     const users = await prisma.users.findMany();
     return NextResponse.json(users);
   } catch (error) {
-    console.error('Error fetching users:', error); // Log the error to the console
-    return NextResponse.json({ error: 'Error fetching users', details: error }, { status: 500 });
+    console.error('Error fetching users:', error);
+    const handledError = handlePrismaError(error);
+    return NextResponse.json(handledError, { status: 500 });
   }
 }
 
@@ -47,14 +69,16 @@ export async function PUT(req: Request) {
       data: {
         name,
         surname,
-        salary: Number(salary), // Convert string to number
+        salary: Number(salary),
         phone,
         cname,
       },
     });
-    return NextResponse.json(updatedUser); // Return the updated user
+    return NextResponse.json(updatedUser);
   } catch (error) {
-    return NextResponse.json({ error: 'Error updating user', details: error }, { status: 500 });
+    console.error('Error updating user:', error);
+    const handledError = handlePrismaError(error);
+    return NextResponse.json(handledError, { status: 500 });
   }
 }
 
@@ -66,8 +90,10 @@ export async function DELETE(req: Request) {
     const deletedUser = await prisma.users.delete({
       where: { email },
     });
-    return NextResponse.json(deletedUser); // Return the deleted user
+    return NextResponse.json(deletedUser);
   } catch (error) {
-    return NextResponse.json({ error: 'Error deleting user', details: error }, { status: 500 });
+    console.error('Error deleting user:', error);
+    const handledError = handlePrismaError(error);
+    return NextResponse.json(handledError, { status: 500 });
   }
 }

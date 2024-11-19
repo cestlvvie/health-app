@@ -2,12 +2,33 @@ import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient({
-  log: ['query', 'info', 'warn', 'error'], // Enable Prisma logs
+  log: ['query', 'info', 'warn', 'error'],
 });
 
-// POST: Add a new disease type
+function handleError(error: unknown, defaultMessage: string) {
+  if (error instanceof Error) {
+    if ('code' in error) {
+      const prismaError = error as any;
+      if (prismaError.code === 'P2002') {
+        return NextResponse.json(
+          { error: 'A disease type with this ID already exists.', details: prismaError.meta },
+          { status: 400 }
+        );
+      }
+    }
+    return NextResponse.json(
+      { error: defaultMessage, details: error.message },
+      { status: 500 }
+    );
+  }
+  return NextResponse.json(
+    { error: defaultMessage, details: String(error) },
+    { status: 500 }
+  );
+}
+
 export async function POST(req: Request) {
-  const body = await req.json(); // Parse the request body
+  const body = await req.json();
   const { id, description } = body;
 
   try {
@@ -17,47 +38,23 @@ export async function POST(req: Request) {
         description,
       },
     });
-    return NextResponse.json(newDiseaseType); // Return the newly created disease type
+    return NextResponse.json(newDiseaseType);
   } catch (error) {
-    if (error instanceof Error) {
-      console.error('Error creating disease type:', error.message);
-      return NextResponse.json(
-        { error: 'Error creating disease type', details: error.message },
-        { status: 500 }
-      );
-    } else {
-      console.error('Unknown error:', error);
-      return NextResponse.json(
-        { error: 'Unknown error occurred', details: String(error) },
-        { status: 500 }
-      );
-    }
+    console.error('Error creating disease type:', error);
+    return handleError(error, 'Error creating disease type');
   }
 }
 
-// GET: Fetch all disease types
 export async function GET() {
   try {
     const diseaseTypes = await prisma.diseasetype.findMany();
     return NextResponse.json(diseaseTypes);
   } catch (error) {
-    if (error instanceof Error) {
-      console.error('Error fetching disease types:', error.message);
-      return NextResponse.json(
-        { error: 'Error fetching disease types', details: error.message },
-        { status: 500 }
-      );
-    } else {
-      console.error('Unknown error:', error);
-      return NextResponse.json(
-        { error: 'Unknown error occurred', details: String(error) },
-        { status: 500 }
-      );
-    }
+    console.error('Error fetching disease types:', error);
+    return handleError(error, 'Error fetching disease types');
   }
 }
 
-// PUT: Update a disease type's details
 export async function PUT(req: Request) {
   const body = await req.json();
   const { id, description } = body;
@@ -69,25 +66,13 @@ export async function PUT(req: Request) {
         description,
       },
     });
-    return NextResponse.json(updatedDiseaseType); // Return the updated disease type
+    return NextResponse.json(updatedDiseaseType);
   } catch (error) {
-    if (error instanceof Error) {
-      console.error('Error updating disease type:', error.message);
-      return NextResponse.json(
-        { error: 'Error updating disease type', details: error.message },
-        { status: 500 }
-      );
-    } else {
-      console.error('Unknown error:', error);
-      return NextResponse.json(
-        { error: 'Unknown error occurred', details: String(error) },
-        { status: 500 }
-      );
-    }
+    console.error('Error updating disease type:', error);
+    return handleError(error, 'Error updating disease type');
   }
 }
 
-// DELETE: Remove a disease type
 export async function DELETE(req: Request) {
   const body = await req.json();
   const { id } = body;
@@ -96,20 +81,9 @@ export async function DELETE(req: Request) {
     const deletedDiseaseType = await prisma.diseasetype.delete({
       where: { id },
     });
-    return NextResponse.json(deletedDiseaseType); // Return the deleted disease type
+    return NextResponse.json(deletedDiseaseType);
   } catch (error) {
-    if (error instanceof Error) {
-      console.error('Error deleting disease type:', error.message);
-      return NextResponse.json(
-        { error: 'Error deleting disease type', details: error.message },
-        { status: 500 }
-      );
-    } else {
-      console.error('Unknown error:', error);
-      return NextResponse.json(
-        { error: 'Unknown error occurred', details: String(error) },
-        { status: 500 }
-      );
-    }
+    console.error('Error deleting disease type:', error);
+    return handleError(error, 'Error deleting disease type');
   }
 }

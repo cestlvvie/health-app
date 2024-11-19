@@ -2,10 +2,33 @@ import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient({
-  log: ['query', 'info', 'warn', 'error'], // Enable Prisma logs
+  log: ['query', 'info', 'warn', 'error'],
 });
 
-// POST: Add a new disease
+function handleError(error: unknown, defaultMessage: string) {
+  if (error instanceof Error) {
+    if ('code' in error) {
+      const prismaError = error as any;
+      if (prismaError.code === 'P2003') {
+        if (prismaError.meta?.field_name === 'disease_id_fkey (index)') {
+          return NextResponse.json(
+            { error: 'Disease type ID does not exist.', details: prismaError.meta },
+            { status: 400 }
+          );
+        }
+      }
+    }
+    return NextResponse.json(
+      { error: defaultMessage, details: error.message },
+      { status: 500 }
+    );
+  }
+  return NextResponse.json(
+    { error: defaultMessage, details: String(error) },
+    { status: 500 }
+  );
+}
+
 export async function POST(req: Request) {
   const body = await req.json();
   const { disease_code, pathogen, description, id } = body;
@@ -19,54 +42,30 @@ export async function POST(req: Request) {
         id,
       },
     });
-    return NextResponse.json(newDisease); // Return the newly created disease
+    return NextResponse.json(newDisease);
   } catch (error) {
-    if (error instanceof Error) {
-      console.error('Error creating disease:', error.message);
-      return NextResponse.json(
-        { error: 'Error creating disease', details: error.message },
-        { status: 500 }
-      );
-    } else {
-      console.error('Unknown error:', error);
-      return NextResponse.json(
-        { error: 'Unknown error occurred', details: String(error) },
-        { status: 500 }
-      );
-    }
+    console.error('Error creating disease:', error);
+    return handleError(error, 'Error creating disease');
   }
 }
 
-// GET: Fetch all diseases
 export async function GET() {
   try {
     const diseases = await prisma.disease.findMany({
       include: {
-        diseasetype: true, // Include related disease type data
-        discover: true, // Include discover relationships
-        patientdisease: true, // Include patient disease relationships
-        record: true, // Include record relationships
+        diseasetype: true,
+        discover: true,
+        patientdisease: true,
+        record: true,
       },
     });
     return NextResponse.json(diseases);
   } catch (error) {
-    if (error instanceof Error) {
-      console.error('Error fetching diseases:', error.message);
-      return NextResponse.json(
-        { error: 'Error fetching diseases', details: error.message },
-        { status: 500 }
-      );
-    } else {
-      console.error('Unknown error:', error);
-      return NextResponse.json(
-        { error: 'Unknown error occurred', details: String(error) },
-        { status: 500 }
-      );
-    }
+    console.error('Error fetching diseases:', error);
+    return handleError(error, 'Error fetching diseases');
   }
 }
 
-// PUT: Update a disease's details
 export async function PUT(req: Request) {
   const body = await req.json();
   const { disease_code, pathogen, description, id } = body;
@@ -80,25 +79,13 @@ export async function PUT(req: Request) {
         id,
       },
     });
-    return NextResponse.json(updatedDisease); // Return the updated disease
+    return NextResponse.json(updatedDisease);
   } catch (error) {
-    if (error instanceof Error) {
-      console.error('Error updating disease:', error.message);
-      return NextResponse.json(
-        { error: 'Error updating disease', details: error.message },
-        { status: 500 }
-      );
-    } else {
-      console.error('Unknown error:', error);
-      return NextResponse.json(
-        { error: 'Unknown error occurred', details: String(error) },
-        { status: 500 }
-      );
-    }
+    console.error('Error updating disease:', error);
+    return handleError(error, 'Error updating disease');
   }
 }
 
-// DELETE: Remove a disease
 export async function DELETE(req: Request) {
   const body = await req.json();
   const { disease_code } = body;
@@ -107,20 +94,9 @@ export async function DELETE(req: Request) {
     const deletedDisease = await prisma.disease.delete({
       where: { disease_code },
     });
-    return NextResponse.json(deletedDisease); // Return the deleted disease
+    return NextResponse.json(deletedDisease);
   } catch (error) {
-    if (error instanceof Error) {
-      console.error('Error deleting disease:', error.message);
-      return NextResponse.json(
-        { error: 'Error deleting disease', details: error.message },
-        { status: 500 }
-      );
-    } else {
-      console.error('Unknown error:', error);
-      return NextResponse.json(
-        { error: 'Unknown error occurred', details: String(error) },
-        { status: 500 }
-      );
-    }
+    console.error('Error deleting disease:', error);
+    return handleError(error, 'Error deleting disease');
   }
 }

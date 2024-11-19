@@ -11,8 +11,11 @@ export default function CreateRecord() {
     total_patients: '',
   });
 
+  const [error, setError] = useState<string | null>(null);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
 
     try {
       const response = await fetch('/api/records', {
@@ -25,21 +28,27 @@ export default function CreateRecord() {
         }),
       });
 
-      if (response.ok) {
-        alert('Record added successfully!');
-        setForm({
-          email: '',
-          cname: '',
-          disease_code: '',
-          total_deaths: '',
-          total_patients: '',
-        });
-        window.location.href = '/records/main'; 
-      } else {
-        console.error('Error creating record');
+      if (!response.ok) {
+        const errorData = await response.json();
+        setError(errorData.error || 'Something went wrong');
+        return;
       }
-    } catch (error) {
-      console.error('Error:', error);
+
+      alert('Record added successfully!');
+      setForm({
+        email: '',
+        cname: '',
+        disease_code: '',
+        total_deaths: '',
+        total_patients: '',
+      });
+      window.location.href = '/records/main';
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('An unexpected error occurred.');
+      }
     }
   };
 
@@ -47,6 +56,11 @@ export default function CreateRecord() {
     <div className="min-h-screen bg-gray-100 flex items-center justify-center">
       <div className="bg-white p-8 rounded shadow w-full max-w-md">
         <h1 className="text-2xl font-bold text-center mb-6 text-blue-600">Add Record</h1>
+        {error && (
+          <div className="text-red-600 text-sm mb-4 p-2 border border-red-600 rounded bg-red-100">
+            {error}
+          </div>
+        )}
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="email"

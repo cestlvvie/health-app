@@ -2,12 +2,41 @@ import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient({
-  log: ['query', 'info', 'warn', 'error'], // Enable Prisma logs
+  log: ['query', 'info', 'warn', 'error'],
 });
 
-// Create a new public servant
+function handleError(error: unknown, defaultMessage: string) {
+  if (error instanceof Error) {
+    if ('code' in error) {
+      const prismaError = error as any;
+      if (prismaError.code === 'P2002') {
+        return NextResponse.json(
+          { error: 'A public servant with this email already exists.', details: prismaError.meta },
+          { status: 400 }
+        );
+      }
+      if (prismaError.code === 'P2003') {
+        if (prismaError.meta?.field_name === 'publicservant_email_fkey (index)') {
+          return NextResponse.json(
+            { error: 'The user with the provided email does not exist.', details: prismaError.meta },
+            { status: 400 }
+          );
+        }
+      }
+    }
+    return NextResponse.json(
+      { error: defaultMessage, details: error.message },
+      { status: 500 }
+    );
+  }
+  return NextResponse.json(
+    { error: defaultMessage, details: String(error) },
+    { status: 500 }
+  );
+}
+
 export async function POST(req: Request) {
-  const body = await req.json(); // Parse the request body
+  const body = await req.json();
   const { email, department } = body;
 
   try {
@@ -15,38 +44,29 @@ export async function POST(req: Request) {
       data: {
         email,
         department,
-        // The related user record must exist before this call
       },
     });
-    return NextResponse.json(newPublicServant); // Return the newly created public servant
+    return NextResponse.json(newPublicServant);
   } catch (error) {
-    console.error('Error creating public servant:', error); // Log the error
-    return NextResponse.json(
-      { error: 'Error creating public servant', details: error },
-      { status: 500 }
-    );
+    console.error('Error creating public servant:', error);
+    return handleError(error, 'Error creating public servant');
   }
 }
 
-// Fetch all public servants
 export async function GET() {
   try {
     const publicServants = await prisma.publicservant.findMany({
       include: {
-        users: true, // Include related user data
+        users: true,
       },
     });
     return NextResponse.json(publicServants);
   } catch (error) {
-    console.error('Error fetching public servants:', error); // Log the error
-    return NextResponse.json(
-      { error: 'Error fetching public servants', details: error },
-      { status: 500 }
-    );
+    console.error('Error fetching public servants:', error);
+    return handleError(error, 'Error fetching public servants');
   }
 }
 
-// Update a public servant's details
 export async function PUT(req: Request) {
   const body = await req.json();
   const { email, department } = body;
@@ -54,21 +74,15 @@ export async function PUT(req: Request) {
   try {
     const updatedPublicServant = await prisma.publicservant.update({
       where: { email },
-      data: {
-        department,
-      },
+      data: { department },
     });
-    return NextResponse.json(updatedPublicServant); // Return the updated public servant
+    return NextResponse.json(updatedPublicServant);
   } catch (error) {
-    console.error('Error updating public servant:', error); // Log the error
-    return NextResponse.json(
-      { error: 'Error updating public servant', details: error },
-      { status: 500 }
-    );
+    console.error('Error updating public servant:', error);
+    return handleError(error, 'Error updating public servant');
   }
 }
 
-// Delete a public servant
 export async function DELETE(req: Request) {
   const body = await req.json();
   const { email } = body;
@@ -77,12 +91,9 @@ export async function DELETE(req: Request) {
     const deletedPublicServant = await prisma.publicservant.delete({
       where: { email },
     });
-    return NextResponse.json(deletedPublicServant); // Return the deleted public servant
+    return NextResponse.json(deletedPublicServant);
   } catch (error) {
-    console.error('Error deleting public servant:', error); // Log the error
-    return NextResponse.json(
-      { error: 'Error deleting public servant', details: error },
-      { status: 500 }
-    );
+    console.error('Error deleting public servant:', error);
+    return handleError(error, 'Error deleting public servant');
   }
 }

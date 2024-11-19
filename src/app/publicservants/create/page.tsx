@@ -8,8 +8,11 @@ export default function CreatePublicServant() {
     department: '',
   });
 
+  const [error, setError] = useState<string | null>(null);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
 
     try {
       const response = await fetch('/api/publicservants', {
@@ -18,18 +21,24 @@ export default function CreatePublicServant() {
         body: JSON.stringify(form),
       });
 
-      if (response.ok) {
-        alert('Public Servant added successfully!');
-        setForm({
-          email: '',
-          department: '',
-        });
-        window.location.href = '/publicservants/main'; 
-      } else {
-        console.error('Error creating public servant');
+      if (!response.ok) {
+        const errorData = await response.json();
+        setError(errorData.error || 'Something went wrong');
+        return;
       }
-    } catch (error) {
-      console.error('Error:', error);
+
+      alert('Public Servant added successfully!');
+      setForm({
+        email: '',
+        department: '',
+      });
+      window.location.href = '/publicservants/main';
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('An unexpected error occurred.');
+      }
     }
   };
 
@@ -37,6 +46,11 @@ export default function CreatePublicServant() {
     <div className="min-h-screen bg-gray-100 flex items-center justify-center">
       <div className="bg-white p-8 rounded shadow w-full max-w-md">
         <h1 className="text-2xl font-bold text-center mb-6 text-blue-600">Add Public Servant</h1>
+        {error && (
+          <div className="text-red-600 text-sm mb-4 p-2 border border-red-600 rounded bg-red-100">
+            {error}
+          </div>
+        )}
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="email"

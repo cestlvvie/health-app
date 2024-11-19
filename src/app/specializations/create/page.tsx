@@ -8,15 +8,18 @@ export default function CreateSpecialization() {
     email: '',
   });
 
+  const [error, setError] = useState<string | null>(null);  
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);  
 
     try {
-      const response = await fetch('/api/specializations', { // Adjusted endpoint
+      const response = await fetch('/api/specializations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          id: form.id ? Number(form.id) : undefined, // Convert id to number
+          id: form.id ? Number(form.id) : undefined,  
           email: form.email,
         }),
       });
@@ -27,12 +30,15 @@ export default function CreateSpecialization() {
           id: '',
           email: '',
         });
-        window.location.href = '/specializations/main'; 
+        window.location.href = '/specializations/main';  
       } else {
-        console.error('Error creating specialization');
+        const data = await response.json();
+        console.error('Backend Error Response:', data);  
+        setError(data.error || 'An unknown error occurred');
       }
-    } catch (error) {
-      console.error('Error:', error);
+    } catch (err) {
+      setError('Failed to create specialization. Please try again.');
+      console.error('Frontend Error:', err);  
     }
   };
 
@@ -40,6 +46,11 @@ export default function CreateSpecialization() {
     <div className="min-h-screen bg-gray-100 flex items-center justify-center">
       <div className="bg-white p-8 rounded shadow w-full max-w-md">
         <h1 className="text-2xl font-bold text-center mb-6 text-blue-600">Add Specialization</h1>
+        {error && (
+          <div className="text-red-600 text-sm mb-4 p-2 border border-red-600 rounded bg-red-100">
+            {error}
+          </div>
+        )}
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="number"
